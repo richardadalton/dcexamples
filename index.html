@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-    <script type="text/javascript" src="d3/d3.v3.js"></script>
 
     <title>DC.js Examples</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/dc.css"/>
+
+    <script type="text/javascript" src="static/js/d3.js"></script>
+    <script type="text/javascript" src="static/js/crossfilter.js"></script>
+    <script type="text/javascript" src="static/js/dc.js"></script>
+
 </head>
 <body>
 
@@ -33,6 +40,192 @@
     <h3>dc.js - Dimensional Charting Javascript Library</h3>
     <p>dc.js is a javascript charting library with native crossfilter support, allowing highly efficient exploration on large multi-dimensional datasets (inspired by crossfilter's demo). It leverages d3 to render charts in CSS-friendly SVG format. Charts rendered using dc.js are data driven and reactive and therefore provide instant feedback to user interaction.</p>
 </div>
+
+<div class="container">
+
+<div id="name-pie-chart"></div>
+
+<div id="store-pie-chart"></div>
+
+<div id="average-by-name-chart"></div>
+
+<div id="composite-chart"></div>
+
+
+</div>
+
+<script>
+    var data = [
+        {date: "01/01/2012", name: 'Tom', store: 'A', spend: 100},
+        {date: "01/01/2012", name: 'Bob', store: 'B', spend: 100},
+        {date: "01/01/2012", name: 'Alice', store: 'A', spend: 200},
+        {date: "01/02/2012", name: 'Tom', store: 'B', spend: 50},
+        {date: "01/02/2012", name: 'Bob', store: 'A', spend: 150},
+        {date: "01/02/2012", name: 'Alice', store: 'B', spend: 150},
+        {date: "01/03/2012", name: 'Tom', store: 'A', spend: 55},
+        {date: "01/03/2012", name: 'Bob', store: 'B', spend: 35},
+        {date: "01/03/2012", name: 'Alice', store: 'B', spend: 50},
+        {date: "01/04/2012", name: 'Tom', store: 'A', spend: 70},
+        {date: "01/04/2012", name: 'Bob', store: 'A', spend: 85},
+        {date: "01/04/2012", name: 'Alice', store: 'B', spend: 150},
+        {date: "01/05/2012", name: 'Tom', store: 'A', spend: 120},
+        {date: "01/05/2012", name: 'Bob', store: 'B', spend: 125},
+        {date: "01/05/2012", name: 'Alice', store: 'A', spend: 45},
+        {date: "01/06/2012", name: 'Tom', store: 'B', spend: 750},
+        {date: "01/06/2012", name: 'Bob', store: 'B', spend: 85},
+        {date: "01/06/2012", name: 'Alice', store: 'B', spend: 10},
+        {date: "01/07/2012", name: 'Tom', store: 'A', spend: 200},
+        {date: "01/07/2012", name: 'Bob', store: 'A', spend: 200},
+        {date: "01/07/2012", name: 'Alice', store: 'A', spend: 200},
+        {date: "01/08/2012", name: 'Tom', store: 'A', spend: 150},
+        {date: "01/08/2012", name: 'Bob', store: 'B', spend: 125},
+        {date: "01/08/2012", name: 'Alice', store: 'A', spend: 25},
+        {date: "01/09/2012", name: 'Tom', store: 'A', spend: 65},
+        {date: "01/09/2012", name: 'Bob', store: 'A', spend: 40},
+        {date: "01/09/2012", name: 'Alice', store: 'B', spend: 35},
+        {date: "01/10/2012", name: 'Tom', store: 'A', spend: 350},
+        {date: "01/10/2012", name: 'Bob', store: 'A', spend: 110},
+        {date: "01/10/2012", name: 'Alice', store: 'B', spend: 15},
+        {date: "01/11/2012", name: 'Tom', store: 'B', spend: 140},
+        {date: "01/11/2012", name: 'Bob', store: 'B', spend: 60},
+        {date: "01/11/2012", name: 'Alice', store: 'A', spend: 80},
+        {date: "01/12/2012", name: 'Tom', store: 'A', spend: 75},
+        {date: "01/12/2012", name: 'Bob', store: 'B', spend: 90},
+        {date: "01/12/2012", name: 'Alice', store: 'A', spend: 60}
+    ];
+
+    var ndx = crossfilter(data);
+
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
+
+    data.forEach(function(d){
+        d.date = parseDate(d.date);
+    });
+
+    var dateDim = ndx.dimension(dc.pluck('date'));
+    var nameDim = ndx.dimension(dc.pluck('name'));
+    var nameDimForAverage = ndx.dimension(dc.pluck('name'));
+    var storeDim = ndx.dimension(dc.pluck('store'));
+
+    var minDate = dateDim.bottom(1)[0].date;
+    var maxDate = dateDim.top(1)[0].date;
+
+
+    var tomSpendByMonth = dateDim.group().reduceSum(function (d) {
+        if (d.name === 'Tom') {
+            return +d.spend;
+        } else {
+            return 0;
+        }
+    });
+
+    var bobSpendByMonth = dateDim.group().reduceSum(function (d) {
+        if (d.name === 'Bob') {
+            return +d.spend;
+        } else {
+            return 0;
+        }
+    });
+
+    var aliceSpendByMonth = dateDim.group().reduceSum(function (d) {
+        if (d.name === 'Alice') {
+            return +d.spend;
+        } else {
+            return 0;
+        }
+    });
+
+    spendByName = nameDim.group().reduceSum(dc.pluck('spend'));
+    spendByStore = storeDim.group().reduceSum(dc.pluck('spend'));
+
+    var namePieChart = dc.pieChart('#name-pie-chart');
+
+    namePieChart
+        .height(330)
+        .radius(90)
+        .transitionDuration(1500)
+        .dimension(nameDim)
+        .group(spendByName);
+
+    var storePieChart = dc.pieChart('#store-pie-chart');
+
+    storePieChart
+        .height(330)
+        .radius(90)
+        .transitionDuration(1500)
+        .dimension(storeDim)
+        .group(spendByStore);
+
+    
+    var averageSpendByName = nameDimForAverage.group().reduce(
+        function (p, v) {
+            ++p.count;
+            p.total += v.spend;
+            p.average = p.total / p.count;
+            return p;
+        },
+        function (p, v) {
+            --p.count;
+            if(p.count == 0) {
+                p.total = 0;
+                p.average = 0;
+            } else {
+                p.total -= v.spend;
+                p.average = p.total / p.count;
+            };
+            return p;
+        },
+        function () {
+            return {count: 0, total: 0, average: 0};
+        }
+    );
+
+    var averageSpendByNameChart = dc.barChart("#average-by-name-chart");
+
+    averageSpendByNameChart
+        .width(500)
+        .height(300)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(nameDim)
+        .group(averageSpendByName)
+        .valueAccessor(function (p) {
+            return p.value.average;
+        })
+        .transitionDuration(500)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .elasticY(true)
+        .xAxisLabel("Person")
+        .yAxis().ticks(4);
+
+
+    var compositeChart = dc.compositeChart('#composite-chart');
+    compositeChart
+        .width(990)
+        .height(200)
+        .x(d3.time.scale().domain([minDate, maxDate]))
+        .yAxisLabel("The Y Axis")
+        .legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
+        .renderHorizontalGridLines(true)
+        .compose([
+            dc.lineChart(compositeChart)
+                .dimension(dateDim)
+                .colors('green')
+                .group(tomSpendByMonth, 'Tom'),
+            dc.lineChart(compositeChart)
+                .dimension(dateDim)
+                .colors('red')
+                .group(bobSpendByMonth, 'Bob'),
+            dc.lineChart(compositeChart)
+                .dimension(dateDim)
+                .colors('blue')
+                .group(aliceSpendByMonth, 'Alice')
+        ])
+        .brushOn(false)
+        .render();
+
+        dc.renderAll()
+</script>
 
 </body>
 </html>
