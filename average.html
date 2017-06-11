@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Composite Chart Example</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <title>DC.js Examples</title>
     <link rel="stylesheet" href="static/css/style.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="static/css/dc.css"/>
@@ -11,8 +12,8 @@
     <script type="text/javascript" src="static/js/d3.js"></script>
     <script type="text/javascript" src="static/js/crossfilter.js"></script>
     <script type="text/javascript" src="static/js/dc.js"></script>
-</head>
 
+</head>
 <body>
 
 <header>
@@ -37,10 +38,14 @@
 </header>
 
 <div class="container">
-    <h3>Composite Chart</h3>
-    <p>Composite Charts allow multiple charts to be plotted together.</p>
+    <h3>Average</h3>
+    <p>To reduce facts to an average measure, you need to create a cusom reducer.</p>
+</div>
 
-<div id="composite-chart"></div>
+<div class="container">
+
+<div id="average-by-name-chart"></div>
+
 </div>
 
 <script>
@@ -91,64 +96,51 @@
         d.date = parseDate(d.date);
     });
 
-    var dateDim = ndx.dimension(function(d){
-        return d.date;
-    });
+    var nameDim = ndx.dimension(dc.pluck('name'));
 
-    var minDate = dateDim.bottom(1)[0].date;
-    var maxDate = dateDim.top(1)[0].date;
-
-
-    var tomSpendByMonth = dateDim.group().reduceSum(function (d) {
-        if (d.name === 'Tom') {
-            return +d.spend;
-        } else {
-            return 0;
+    var averageSpendByName = nameDim.group().reduce(
+        function (p, v) {
+            ++p.count;
+            p.total += v.spend;
+            p.average = p.total / p.count;
+            return p;
+        },
+        function (p, v) {
+            --p.count;
+            if(p.count == 0) {
+                p.total = 0;
+                p.average = 0;
+            } else {
+                p.total -= v.spend;
+                p.average = p.total / p.count;
+            };
+            return p;
+        },
+        function () {
+            return {count: 0, total: 0, average: 0};
         }
-    });
+    );
 
-    var bobSpendByMonth = dateDim.group().reduceSum(function (d) {
-        if (d.name === 'Bob') {
-            return +d.spend;
-        } else {
-            return 0;
-        }
-    });
+    var averageSpendByNameChart = dc.barChart("#average-by-name-chart");
 
-    var aliceSpendByMonth = dateDim.group().reduceSum(function (d) {
-        if (d.name === 'Alice') {
-            return +d.spend;
-        } else {
-            return 0;
-        }
-    });
+    averageSpendByNameChart
+        .width(500)
+        .height(300)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(nameDim)
+        .group(averageSpendByName)
+        .valueAccessor(function (p) {
+            return p.value.average;
+        })
+        .transitionDuration(500)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .elasticY(true)
+        .xAxisLabel("Person")
+        .yAxis().ticks(4);
 
-    var compositeChart = dc.compositeChart('#composite-chart');
-    compositeChart
-        .width(990)
-        .height(200)
-        .x(d3.time.scale().domain([minDate, maxDate]))
-        .yAxisLabel("The Y Axis")
-        .legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
-        .renderHorizontalGridLines(true)
-        .compose([
-            dc.lineChart(compositeChart)
-                .dimension(dateDim)
-                .colors('green')
-                .group(tomSpendByMonth, 'Tom'),
-            dc.lineChart(compositeChart)
-                .dimension(dateDim)
-                .colors('red')
-                .group(bobSpendByMonth, 'Bob'),
-            dc.lineChart(compositeChart)
-                .dimension(dateDim)
-                .colors('blue')
-                .group(aliceSpendByMonth, 'Alice')
-        ])
-        .brushOn(false)
-        .render();
+    dc.renderAll()
 </script>
 
 </body>
-
 </html>
