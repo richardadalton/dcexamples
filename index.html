@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script type="text/javascript" src="d3/d3.v3.js"></script>
+
+    <title>DC.js Examples</title>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <img src="resources/dclogo.png">
+            </div>
+            <div class="col-md-10">
+                <h1 class="logo">DC.js Examples</h1>
+                <h4>Richard Dalton</h4>
+                <div class="btn-group btn-group-md" role="group" aria-label="...">
+                    <a href="index.html" class="btn btn-default" role="button">Home</a>
+                    <a href="stackedLine.html" class="btn btn-default" role="button">Stacked</a>
+                    <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
+                    <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
+                    <a href="https://dc-js.github.io/dc.js/" class="btn btn-default" role="button">DC.js</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <h3>dc.js - Dimensional Charting Javascript Library</h3>
+    <p>dc.js is a javascript charting library with native crossfilter support, allowing highly efficient exploration on large multi-dimensional datasets (inspired by crossfilter's demo). It leverages d3 to render charts in CSS-friendly SVG format. Charts rendered using dc.js are data driven and reactive and therefore provide instant feedback to user interaction.</p>
+
+    <div class="col-md-6">
+        <div id="draw_here"></div>
+    </div>
+
+    <div class="col-md-6">
+<pre>
+    data = [
+        {"key": "First Heading", "value":"First Paragraph"},
+        {"key": "Second Heading", "value":"Second Paragraph"},
+        {"key": "Third Heading", "value":"Third Paragraph"},
+        {"key": "Fourth Heading", "value":"Fourth Paragraph"},
+        {"key": "Fifth Heading", "value":"Fifth Paragraph"},
+    ];
+
+    //Create SVG element
+    var doc = d3.select("#draw_here");
+
+    var doc_item = doc.selectAll("div")
+            .data(data)
+            .enter()
+            .append("div");
+
+    doc_item.append("h4").text(function (d) {
+                return d.key;
+            });
+
+    doc_item.append("p").text(function (d) {
+        return d.value;
+    })
+</pre>
+    </div>
+</div>
+
+<script>
+    data = [
+        {"key": "First Heading", "value":"First Paragraph"},
+        {"key": "Second Heading", "value":"Second Paragraph"},
+        {"key": "Third Heading", "value":"Third Paragraph"},
+        {"key": "Fourth Heading", "value":"Fourth Paragraph"},
+        {"key": "Fifth Heading", "value":"Fifth Paragraph"},
+    ];
+
+    //Create SVG element
+    var doc = d3.select("#draw_here");
+
+    var doc_item = doc.selectAll("div")
+            .data(data)
+            .enter()
+            .append("div");
+
+    doc_item.append("h4").text(function (d) {
+                return d.key;
+            });
+
+    doc_item.append("p").text(function (d) {
+        return d.value;
+    })
+</script>
+
+</body>
+</html>

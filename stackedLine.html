@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+		<meta http-equiv="content-type" content="text/html" charset="utf-8">
+
+		<title>D3: Scale</title>
+        <script type="text/javascript" src="d3/d3.v3.js"></script>
+        <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.0/dc.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/dc/1.7.0/dc.css">
+</head>
+<body>
+
+    <div id="chart­monthly-spend"></div>
+
+
+<script type="text/javascript">
+
+        function print_filter(filter) {
+            var f = eval(filter);
+            if (typeof (f.length) != "undefined") {} else {}
+            if (typeof (f.top) != "undefined") {f = f.top(Infinity);} else {}
+            if (typeof (f.dimension) != "undefined")
+                {f = f.dimension(function(d) {
+                    return "";}).top(Infinity);
+                }
+            else
+                {}
+
+            console.log(
+                    filter + "(" + f.length + ") = " +
+                    JSON.stringify(f)
+                            .replace("[","[\n\t")
+                            .replace("]","\n]")
+            );
+        }
+
+        var data = [
+            {date: "01/01/2012", name: 'Tom', store: 'A', spend: 100},
+            {date: "01/01/2012", name: 'Bob', store: 'B', spend: 100},
+            {date: "01/01/2012", name: 'Alice', store: 'A', spend: 200},
+            {date: "01/02/2012", name: 'Tom', store: 'B', spend: 50},
+            {date: "01/02/2012", name: 'Bob', store: 'A', spend: 150},
+            {date: "01/02/2012", name: 'Alice', store: 'B', spend: 150},
+            {date: "01/03/2012", name: 'Tom', store: 'A', spend: 55},
+            {date: "01/03/2012", name: 'Bob', store: 'B', spend: 35},
+            {date: "01/03/2012", name: 'Alice', store: 'B', spend: 50},
+            {date: "01/04/2012", name: 'Tom', store: 'A', spend: 70},
+            {date: "01/04/2012", name: 'Bob', store: 'A', spend: 85},
+            {date: "01/04/2012", name: 'Alice', store: 'B', spend: 150},
+            {date: "01/05/2012", name: 'Tom', store: 'A', spend: 120},
+            {date: "01/05/2012", name: 'Bob', store: 'B', spend: 125},
+            {date: "01/05/2012", name: 'Alice', store: 'A', spend: 45},
+            {date: "01/06/2012", name: 'Tom', store: 'B', spend: 750},
+            {date: "01/06/2012", name: 'Bob', store: 'B', spend: 85},
+            {date: "01/06/2012", name: 'Alice', store: 'B', spend: 10},
+            {date: "01/07/2012", name: 'Tom', store: 'A', spend: 200},
+            {date: "01/07/2012", name: 'Bob', store: 'A', spend: 200},
+            {date: "01/07/2012", name: 'Alice', store: 'A', spend: 200},
+            {date: "01/08/2012", name: 'Tom', store: 'A', spend: 150},
+            {date: "01/08/2012", name: 'Bob', store: 'B', spend: 125},
+            {date: "01/08/2012", name: 'Alice', store: 'A', spend: 25},
+            {date: "01/09/2012", name: 'Tom', store: 'A', spend: 65},
+            {date: "01/09/2012", name: 'Bob', store: 'A', spend: 40},
+            {date: "01/09/2012", name: 'Alice', store: 'B', spend: 35},
+            {date: "01/10/2012", name: 'Tom', store: 'A', spend: 350},
+            {date: "01/10/2012", name: 'Bob', store: 'A', spend: 110},
+            {date: "01/10/2012", name: 'Alice', store: 'B', spend: 15},
+            {date: "01/11/2012", name: 'Tom', store: 'B', spend: 140},
+            {date: "01/11/2012", name: 'Bob', store: 'B', spend: 60},
+            {date: "01/11/2012", name: 'Alice', store: 'A', spend: 80},
+            {date: "01/12/2012", name: 'Tom', store: 'A', spend: 75},
+            {date: "01/12/2012", name: 'Bob', store: 'B', spend: 90},
+            {date: "01/12/2012", name: 'Alice', store: 'A', spend: 60}
+        ];
+
+        var ndx = crossfilter(data);
+
+        var parseDate = d3.time.format("%m/%d/%Y").parse;
+
+        data.forEach(function(d){
+            d.date = parseDate(d.date);
+            d.month = d.date.getMonth();
+        });
+
+        var monthDim = ndx.dimension(function(d){
+            return d.date;
+        });
+
+        var minMonth = monthDim.bottom(1)[0].date;
+        var maxMonth = monthDim.top(1)[0].date;
+
+
+        var spendByMonth = monthDim.group().reduceSum(function (d) {
+            return d['spend'];
+        })
+
+        var tomSpendByMonth = monthDim.group().reduceSum(function (d) {
+            if (d.name === 'Tom') {
+                return d.spend;
+            } else {
+                return 0;
+            }
+        });
+
+        var bobSpendByMonth = monthDim.group().reduceSum(function (d) {
+            if (d.name === 'Bob') {
+                return d.spend;
+            } else {
+                return 0;
+            }
+        });
+
+        var aliceSpendByMonth = monthDim.group().reduceSum(function (d) {
+            if (d.name === 'Alice') {
+                return d.spend;
+            } else {
+                return 0;
+            }
+        });
+
+        //        var spendByMonth = monthDim.group()
+//                .reduce(
+//                        function reduceAdd(p, v) {
+//                          ++p.count;
+//                          p.total += v.spend;
+//                          return p;
+//                        },
+//                        function reduceRemove(p, v) {
+//                          --p.count;
+//                          p.total -= v.spend;
+//                          return p;
+//                        },
+//                        function reduceInitial() {
+//                          return {count: 0, total: 0};
+//                        });
+
+        var monthlySpendChart = dc.lineChart("#chart­monthly-spend");
+
+        monthlySpendChart
+                .width(600)
+                .height(300)
+                .renderArea(true)
+                .dimension(monthDim)
+                .group(tomSpendByMonth)
+                .stack(bobSpendByMonth)
+                .stack(aliceSpendByMonth)
+                .x(d3.time.scale().domain([minMonth,maxMonth]));
+
+        dc.renderAll();
+
+</script>
+
+</body>
+</html>
