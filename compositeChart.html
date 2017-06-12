@@ -27,6 +27,7 @@
                 <div class="btn-group btn-group-md" role="group" aria-label="...">
                     <a href="index.html" class="btn btn-default" role="button">Home</a>
                     <a href="average.html" class="btn btn-default" role="button">Average</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
                     <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
                     <a href="stacked.html" class="btn btn-default" role="button">Stacked</a>
                     <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
@@ -99,7 +100,6 @@
     var minDate = dateDim.bottom(1)[0].date;
     var maxDate = dateDim.top(1)[0].date;
 
-
     var tomSpendByMonth = dateDim.group().reduceSum(function (d) {
         if (d.name === 'Tom') {
             return +d.spend;
@@ -137,7 +137,7 @@
                 .dimension(dateDim)
                 .colors('green')
                 .group(tomSpendByMonth, 'Tom'),
-            dc.lineChart(compositeChart)
+            dc.barChart(compositeChart)
                 .dimension(dateDim)
                 .colors('red')
                 .group(bobSpendByMonth, 'Bob'),

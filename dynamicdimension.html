@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <title>DC.js Examples</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/dc.css"/>
+
+    <script type="text/javascript" src="static/js/d3.js"></script>
+    <script type="text/javascript" src="static/js/crossfilter.js"></script>
+    <script type="text/javascript" src="static/js/dc.js"></script>
+
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <img src="resources/dclogo.png">
+            </div>
+            <div class="col-md-10">
+                <h1 class="logo">DC.js Examples</h1>
+                <h4>Richard Dalton</h4>
+                <div class="btn-group btn-group-md" role="group" aria-label="...">
+                    <a href="index.html" class="btn btn-default" role="button">Home</a>
+                    <a href="average.html" class="btn btn-default" role="button">Average</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
+                    <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
+                    <a href="stacked.html" class="btn btn-default" role="button">Stacked</a>
+                    <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
+                    <a href="https://dc-js.github.io/dc.js/" class="btn btn-default" role="button">DC.js</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <h3>Dynamic Dimension</h3>
+    <p>Dimensions can be created on the fly, by using a function to catgorise data.</p>
+</div>
+
+<div class="container">
+
+<div id="chart-here"></div>
+
+</div>
+
+<script>
+    var data = [
+        {date: "01/01/2012", name: 'Tom', store: 'A', spend: 100},
+        {date: "01/01/2012", name: 'Bob', store: 'B', spend: 100},
+        {date: "01/01/2012", name: 'Alice', store: 'A', spend: 200},
+        {date: "01/02/2012", name: 'Tom', store: 'B', spend: 50},
+        {date: "01/02/2012", name: 'Bob', store: 'A', spend: 150},
+        {date: "01/02/2012", name: 'Alice', store: 'B', spend: 150},
+        {date: "01/03/2012", name: 'Tom', store: 'A', spend: 55},
+        {date: "01/03/2012", name: 'Bob', store: 'B', spend: 35},
+        {date: "01/03/2012", name: 'Alice', store: 'B', spend: 50},
+        {date: "01/04/2012", name: 'Tom', store: 'A', spend: 70},
+        {date: "01/04/2012", name: 'Bob', store: 'A', spend: 85},
+        {date: "01/04/2012", name: 'Alice', store: 'B', spend: 150},
+        {date: "01/05/2012", name: 'Tom', store: 'A', spend: 120},
+        {date: "01/05/2012", name: 'Bob', store: 'B', spend: 125},
+        {date: "01/05/2012", name: 'Alice', store: 'A', spend: 45},
+        {date: "01/06/2012", name: 'Tom', store: 'B', spend: 750},
+        {date: "01/06/2012", name: 'Bob', store: 'B', spend: 85},
+        {date: "01/06/2012", name: 'Alice', store: 'B', spend: 10},
+        {date: "01/07/2012", name: 'Tom', store: 'A', spend: 200},
+        {date: "01/07/2012", name: 'Bob', store: 'A', spend: 200},
+        {date: "01/07/2012", name: 'Alice', store: 'A', spend: 200},
+        {date: "01/08/2012", name: 'Tom', store: 'A', spend: 150},
+        {date: "01/08/2012", name: 'Bob', store: 'B', spend: 125},
+        {date: "01/08/2012", name: 'Bob', store: 'A', spend: 25},
+        {date: "01/09/2012", name: 'Tom', store: 'A', spend: 65},
+        {date: "01/09/2012", name: 'Bob', store: 'A', spend: 40},
+        {date: "01/09/2012", name: 'Alice', store: 'B', spend: 35},
+        {date: "01/10/2012", name: 'Tom', store: 'A', spend: 350},
+        {date: "01/10/2012", name: 'Bob', store: 'A', spend: 110},
+        {date: "01/10/2012", name: 'Alice', store: 'B', spend: 15},
+        {date: "01/11/2012", name: 'Tom', store: 'B', spend: 140},
+        {date: "01/11/2012", name: 'Bob', store: 'B', spend: 60},
+        {date: "01/11/2012", name: 'Alice', store: 'A', spend: 80},
+        {date: "01/12/2012", name: 'Tom', store: 'A', spend: 75},
+        {date: "01/12/2012", name: 'Bob', store: 'B', spend: 90},
+        {date: "01/12/2012", name: 'Alice', store: 'A', spend: 60}
+    ];
+
+    var ndx = crossfilter(data);
+
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
+
+    data.forEach(function(d){
+        d.date = parseDate(d.date);
+    });
+
+    var dim = ndx.dimension(function(d) {
+        if(d['spend'] >= 200)
+            return 'Big';
+        else
+            return 'Small';
+    });
+
+    var group = dim.group();
+
+    var chart = dc.barChart("#chart-here");
+
+    chart
+        .width(500)
+        .height(300)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(dim)
+        .group(group)
+        .transitionDuration(500)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .elasticY(true)
+        .xAxisLabel("Transaction Size")
+        .yAxis().ticks(4);
+
+    dc.renderAll()
+</script>
+
+</body>
+</html>

@@ -28,6 +28,7 @@
                 <div class="btn-group btn-group-md" role="group" aria-label="...">
                     <a href="index.html" class="btn btn-default" role="button">Home</a>
                     <a href="average.html" class="btn btn-default" role="button">Average</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
                     <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
                     <a href="stacked.html" class="btn btn-default" role="button">Stacked</a>
                     <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
@@ -45,7 +46,7 @@
 
 <div class="container">
 
-<div id="average-by-name-chart"></div>
+<div id="chart-here"></div>
 
 </div>
 
@@ -74,7 +75,7 @@
         {date: "01/07/2012", name: 'Alice', store: 'A', spend: 200},
         {date: "01/08/2012", name: 'Tom', store: 'A', spend: 150},
         {date: "01/08/2012", name: 'Bob', store: 'B', spend: 125},
-        {date: "01/08/2012", name: 'Alice', store: 'A', spend: 25},
+        {date: "01/08/2012", name: 'Bob', store: 'A', spend: 25},
         {date: "01/09/2012", name: 'Tom', store: 'A', spend: 65},
         {date: "01/09/2012", name: 'Bob', store: 'A', spend: 40},
         {date: "01/09/2012", name: 'Alice', store: 'B', spend: 35},
@@ -97,9 +98,9 @@
         d.date = parseDate(d.date);
     });
 
-    var nameDim = ndx.dimension(dc.pluck('name'));
+    var dim = ndx.dimension(dc.pluck('name'));
 
-    var averageSpendByName = nameDim.group().reduce(
+    var group = dim.group().reduce(
         function (p, v) {
             ++p.count;
             p.total += v.spend;
@@ -122,14 +123,14 @@
         }
     );
 
-    var averageSpendByNameChart = dc.barChart("#average-by-name-chart");
+    var chart = dc.barChart("#chart-here");
 
-    averageSpendByNameChart
+    chart
         .width(500)
         .height(300)
         .margins({top: 10, right: 50, bottom: 30, left: 50})
-        .dimension(nameDim)
-        .group(averageSpendByName)
+        .dimension(dim)
+        .group(group)
         .valueAccessor(function (p) {
             return p.value.average;
         })
