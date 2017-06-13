@@ -94,7 +94,7 @@
     ];
 
     queue()
-        .defer(d3.json, "dcexamples/static/us-states.json")
+        .defer(d3.json, "static/us-states.json")
         .await(makeGraphs);
 
     function makeGraphs(error, statesJson) {
