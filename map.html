@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <title>DC.js Examples</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/dc.css"/>
+
+    <script type="text/javascript" src="static/js/d3.js"></script>
+    <script type="text/javascript" src="static/js/crossfilter.js"></script>
+    <script type="text/javascript" src="static/js/dc.js"></script>
+    <script type="text/javascript" src="static/js/queue.js"></script>
+
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <img src="resources/dclogo.png">
+            </div>
+            <div class="col-md-10">
+                <h1 class="logo">DC.js Examples</h1>
+                <h4>Richard Dalton</h4>
+                <div class="btn-group btn-group-md" role="group" aria-label="...">
+                    <a href="index.html" class="btn btn-default" role="button">Home</a>
+                    <a href="average.html" class="btn btn-default" role="button">Average</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
+                    <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
+                    <a href="stacked.html" class="btn btn-default" role="button">Stacked</a>
+                    <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
+                    <a href="https://dc-js.github.io/dc.js/" class="btn btn-default" role="button">DC.js</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <h3>Map</h3>
+    <p>Maps can be used to plot and filter data by geographical region.</p>
+</div>
+
+<div class="container">
+
+<div id="usa-map"></div>
+
+</div>
+
+<script>
+    var data = [
+        {date: "01/01/2012", name: 'Tom', store: 'A', state: 'NY', spend: 100},
+        {date: "01/01/2012", name: 'Bob', store: 'B', state: 'NY', spend: 100},
+        {date: "01/01/2012", name: 'Alice', store: 'A', state: 'NY', spend: 200},
+        {date: "01/02/2012", name: 'Tom', store: 'B', state: 'NY', spend: 50},
+        {date: "01/02/2012", name: 'Bob', store: 'A', state: 'NY', spend: 150},
+        {date: "01/02/2012", name: 'Alice', store: 'B', state: 'NY', spend: 150},
+        {date: "01/03/2012", name: 'Tom', store: 'A', state: 'NY', spend: 55},
+        {date: "01/03/2012", name: 'Bob', store: 'B', state: 'NY', spend: 35},
+        {date: "01/03/2012", name: 'Alice', store: 'B', state: 'NY', spend: 50},
+        {date: "01/04/2012", name: 'Tom', store: 'A', state: 'NY', spend: 70},
+        {date: "01/04/2012", name: 'Bob', store: 'A', state: 'NY', spend: 85},
+        {date: "01/04/2012", name: 'Alice', store: 'B', state: 'NY', spend: 150},
+        {date: "01/05/2012", name: 'Tom', store: 'A', state: 'NY', spend: 120},
+        {date: "01/05/2012", name: 'Bob', store: 'B', state: 'NY', spend: 125},
+        {date: "01/05/2012", name: 'Alice', store: 'A', state: 'NY', spend: 45},
+        {date: "01/06/2012", name: 'Tom', store: 'B', state: 'NY', spend: 750},
+        {date: "01/06/2012", name: 'Bob', store: 'B', state: 'NY', spend: 85},
+        {date: "01/06/2012", name: 'Alice', store: 'B', state: 'NY', spend: 10},
+        {date: "01/07/2012", name: 'Tom', store: 'A', state: 'NY', spend: 200},
+        {date: "01/07/2012", name: 'Bob', store: 'A', state: 'NY', spend: 200},
+        {date: "01/07/2012", name: 'Alice', store: 'A', state: 'NY', spend: 200},
+        {date: "01/08/2012", name: 'Tom', store: 'A', state: 'NY', spend: 150},
+        {date: "01/08/2012", name: 'Bob', store: 'B', state: 'NY', spend: 125},
+        {date: "01/08/2012", name: 'Bob', store: 'A', state: 'NY', spend: 25},
+        {date: "01/09/2012", name: 'Tom', store: 'A', state: 'NY', spend: 65},
+        {date: "01/09/2012", name: 'Bob', store: 'A', state: 'NY', spend: 40},
+        {date: "01/09/2012", name: 'Alice', store: 'B', state: 'NY', spend: 35},
+        {date: "01/10/2012", name: 'Tom', store: 'A', state: 'NY', spend: 350},
+        {date: "01/10/2012", name: 'Bob', store: 'A', state: 'NY', spend: 110},
+        {date: "01/10/2012", name: 'Alice', store: 'B', state: 'NY', spend: 15},
+        {date: "01/11/2012", name: 'Tom', store: 'B', state: 'NY', spend: 140},
+        {date: "01/11/2012", name: 'Bob', store: 'B', state: 'NY', spend: 60},
+        {date: "01/11/2012", name: 'Alice', store: 'A', state: 'NY', spend: 80},
+        {date: "01/12/2012", name: 'Tom', store: 'A', state: 'NY', spend: 75},
+        {date: "01/12/2012", name: 'Bob', store: 'B', state: 'NY', spend: 90},
+        {date: "01/12/2012", name: 'Alice', store: 'A', state: 'NY', spend: 60}
+    ];
+
+    queue()
+        .defer(d3.json, "http://localhost:8000/static/us-states.json")
+        .await(makeGraphs);
+
+    function makeGraphs(error, statesJson) {
+
+        var ndx = crossfilter(data);
+
+        var parseDate = d3.time.format("%m/%d/%Y").parse;
+
+        data.forEach(function(d){
+            d.date = parseDate(d.date);
+        });
+
+        var stateDim = ndx.dimension(dc.pluck('state'));
+
+        var group = stateDim.group();
+
+        var usamap = dc.geoChoroplethChart("#usa-map");
+
+        usamap.width(600)
+            .height(330)
+            .dimension(stateDim)
+            .group(group)
+            .colors(["#E2F2FF", "#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#7C151D"])
+            .colorDomain([0, 1])
+            .overlayGeoJson(statesJson["features"], "state", function (d) {
+                return d.properties.name;
+            })
+            .projection(d3.geo.albersUsa()
+                .scale(600)
+                .translate([340, 150]))
+            .title(function (p) {
+                return "State: " + p["key"]
+                    + "\n"
+                    + "Total Donations: " + Math.round(p["value"]) + " $";
+            });
+
+        dc.renderAll()
+    };
+</script>
+
+</body>
+</html>
