@@ -1,4 +1,4 @@
-![dcjs logo](https://github.com/richardadalton/dcexamples/blob/gh-pages/resources/dclogo.png?raw=true)
+![dcjs logo](https://github.com/richardadalton/dcexamples/blob/master/resources/dclogo.png?raw=true)
 
 # DC.js Examples
 
