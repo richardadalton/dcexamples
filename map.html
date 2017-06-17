@@ -55,56 +55,18 @@
 </div>
 
 <script>
-    var data = [
-        {date: "01/01/2012", name: 'Tom', store: 'A', state: 'NY', spend: 100},
-        {date: "01/01/2012", name: 'Bob', store: 'B', state: 'NY', spend: 100},
-        {date: "01/01/2012", name: 'Alice', store: 'A', state: 'NY', spend: 200},
-        {date: "01/02/2012", name: 'Tom', store: 'B', state: 'NY', spend: 50},
-        {date: "01/02/2012", name: 'Bob', store: 'A', state: 'NY', spend: 150},
-        {date: "01/02/2012", name: 'Alice', store: 'B', state: 'NY', spend: 150},
-        {date: "01/03/2012", name: 'Tom', store: 'A', state: 'NY', spend: 55},
-        {date: "01/03/2012", name: 'Bob', store: 'B', state: 'NY', spend: 35},
-        {date: "01/03/2012", name: 'Alice', store: 'B', state: 'NY', spend: 50},
-        {date: "01/04/2012", name: 'Tom', store: 'A', state: 'NY', spend: 70},
-        {date: "01/04/2012", name: 'Bob', store: 'A', state: 'NY', spend: 85},
-        {date: "01/04/2012", name: 'Alice', store: 'B', state: 'NY', spend: 150},
-        {date: "01/05/2012", name: 'Tom', store: 'A', state: 'NY', spend: 120},
-        {date: "01/05/2012", name: 'Bob', store: 'B', state: 'NY', spend: 125},
-        {date: "01/05/2012", name: 'Alice', store: 'A', state: 'NY', spend: 45},
-        {date: "01/06/2012", name: 'Tom', store: 'B', state: 'NY', spend: 750},
-        {date: "01/06/2012", name: 'Bob', store: 'B', state: 'NY', spend: 85},
-        {date: "01/06/2012", name: 'Alice', store: 'B', state: 'NY', spend: 10},
-        {date: "01/07/2012", name: 'Tom', store: 'A', state: 'NY', spend: 200},
-        {date: "01/07/2012", name: 'Bob', store: 'A', state: 'NY', spend: 200},
-        {date: "01/07/2012", name: 'Alice', store: 'A', state: 'NY', spend: 200},
-        {date: "01/08/2012", name: 'Tom', store: 'A', state: 'NY', spend: 150},
-        {date: "01/08/2012", name: 'Bob', store: 'B', state: 'NY', spend: 125},
-        {date: "01/08/2012", name: 'Bob', store: 'A', state: 'NY', spend: 25},
-        {date: "01/09/2012", name: 'Tom', store: 'A', state: 'NY', spend: 65},
-        {date: "01/09/2012", name: 'Bob', store: 'A', state: 'NY', spend: 40},
-        {date: "01/09/2012", name: 'Alice', store: 'B', state: 'NY', spend: 35},
-        {date: "01/10/2012", name: 'Tom', store: 'A', state: 'NY', spend: 350},
-        {date: "01/10/2012", name: 'Bob', store: 'A', state: 'NY', spend: 110},
-        {date: "01/10/2012", name: 'Alice', store: 'B', state: 'NY', spend: 15},
-        {date: "01/11/2012", name: 'Tom', store: 'B', state: 'NY', spend: 140},
-        {date: "01/11/2012", name: 'Bob', store: 'B', state: 'NY', spend: 60},
-        {date: "01/11/2012", name: 'Alice', store: 'A', state: 'NY', spend: 80},
-        {date: "01/12/2012", name: 'Tom', store: 'A', state: 'NY', spend: 75},
-        {date: "01/12/2012", name: 'Bob', store: 'B', state: 'NY', spend: 90},
-        {date: "01/12/2012", name: 'Alice', store: 'A', state: 'NY', spend: 60}
-    ];
-
     queue()
+        .defer(d3.json, "data/transactions.json")
         .defer(d3.json, "static/us-states.json")
         .await(makeGraphs);
 
-    function makeGraphs(error, statesJson) {
+    function makeGraphs(error, transactionsJson, statesJson) {
 
-        var ndx = crossfilter(data);
+        var ndx = crossfilter(transactionsJson);
 
         var parseDate = d3.time.format("%m/%d/%Y").parse;
 
-        data.forEach(function(d){
+        transactionsJson.forEach(function(d){
             d.date = parseDate(d.date);
         });
 
