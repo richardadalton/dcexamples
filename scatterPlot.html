@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html" charset="utf-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
     <title>DC.js Examples</title>
@@ -14,6 +14,7 @@
     <script type="text/javascript" src="static/js/dc.js"></script>
     <script type="text/javascript" src="static/js/queue.js"></script>
 </head>
+
 <body>
     <a href="https://github.com/richardadalton/dcexamples"><img style="position: absolute; top: 100; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 
@@ -35,9 +36,8 @@
                     <a href="rowChart.html" class="btn btn-default" role="button">Row</a>
                     <a href="scatterPlot.html" class="btn btn-default" role="button">Scatter</a>
                     <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
-                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
                     <a href="map.html" class="btn btn-default" role="button">Map</a>
-                    <a href="https://dc-js.github.io/dc.js/" class="btn btn-default" role="button">DC.js</a>
+                <a href="https://dc-js.github.io/dc.js/" class="btn btn-default" role="button">DC.js</a>
                 </div>
             </div>
         </div>
@@ -45,15 +45,13 @@
 </header>
 
 <div class="container">
-    <h3>Dynamic Dimension</h3>
-    <p>Dimensions can be created on the fly, by using a function to catgorise data.</p>
+    <h3>Scatter Plot</h3>
+    <p>A scatter plot graphs the values of two variables along two axes, the pattern of the resulting points reveals whether there is any correlation.</p>
 </div>
 
 <div class="container">
 
 <div id="chart-here"></div>
-
-</div>
 
 <script>
     queue()
@@ -61,7 +59,6 @@
         .await(makeGraphs);
 
     function makeGraphs(error, transactionsJson) {
-
         var ndx = crossfilter(transactionsJson);
 
         var parseDate = d3.time.format("%m/%d/%Y").parse;
@@ -70,33 +67,37 @@
             d.date = parseDate(d.date);
         });
 
-        var dim = ndx.dimension(function(d) {
-            if(d['spend'] >= 200)
-                return 'Big';
-            else
-                return 'Small';
+        var dateDim = ndx.dimension(function(d){
+            return d.date;
         });
 
-        var group = dim.group();
+        var minDate = dateDim.bottom(1)[0].date;
+        console.log(minDate);
+        var maxDate = dateDim.top(1)[0].date;
+        console.log(maxDate);
 
-        var chart = dc.barChart("#chart-here");
+
+        var dim = ndx.dimension(function(d, i){
+            return [d.date, d.spend]
+        });
+
+        var group = dim.group().reduceSum(dc.pluck('spend'));
+        
+        var chart = dc.scatterPlot("#chart-here");
 
         chart
-            .width(500)
-            .height(300)
-            .margins({top: 10, right: 50, bottom: 30, left: 50})
+            .width(768)
+            .height(480)
+            .x(d3.time.scale().domain([minDate, maxDate]))
+            .brushOn(false)
+            .symbolSize(8)
+            .clipPadding(10)
+            .yAxisLabel("This is the Y Axis!")
             .dimension(dim)
-            .group(group)
-            .transitionDuration(500)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .elasticY(true)
-            .xAxisLabel("Transaction Size")
-            .yAxis().ticks(4);
+            .group(group);
 
-        dc.renderAll()
-    };
+        dc.renderAll()    
+    }
 </script>
-
 </body>
 </html>
