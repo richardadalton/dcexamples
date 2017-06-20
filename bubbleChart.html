@@ -11,6 +11,7 @@
     <script type="text/javascript" src="static/js/d3.js"></script>
     <script type="text/javascript" src="static/js/crossfilter.js"></script>
     <script type="text/javascript" src="static/js/dc.js"></script>
+    <script type="text/javascript" src="static/js/queue.js"></script>
 </head>
 <body>
     <a href="https://github.com/richardadalton/dcexamples"><img style="position: absolute; top: 100; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
@@ -56,123 +57,86 @@
 <script type="text/javascript">
     var numberFormat = d3.format(".2f");
 
-    function print_filter(filter) {
-        var f = eval(filter);
-        if (typeof (f.length) != "undefined") {} else {}
-        if (typeof (f.top) != "undefined") {f = f.top(Infinity);} else {}
-        if (typeof (f.dimension) != "undefined")
-        {f = f.dimension(function(d) {
-            return "";}).top(Infinity);
-        }
-        else
-        {}
+    queue()
+        .defer(d3.json, "data/transactions2.json")
+        .await(makeGraphs);
 
-        console.log(
-            filter + "(" + f.length + ") = " +
-            JSON.stringify(f)
-                .replace("[","[\n\t")
-                .replace("]","\n]")
-        );
-    }
+    function makeGraphs(error, transactionsJson) {
 
-    var data =
-        [
-            {date: "19000103", country: "Ireland",  amount: 10000,  price:  50},
-            {date: "19000103", country: "Australia", amount: 20000, price:  60},
-            {date: "19000103", country: "Austria",  amount: 15000,  price:  40},
-            {date: "19000103", country: "France",   amount: 12500,  price:  100},
-            {date: "19000103", country: "Germany",  amount: 22000,  price:  120},
-            {date: "19000103", country: "Japan",    amount: 30000,  price:  150},
-            {date: "19000103", country: "USA",      amount: 50000,  price:  200},
-            {date: "19000103", country: "Belgium",  amount: 1000,   price:  50},
-            {date: "19000103", country: "Italy",    amount: 32000,  price:  60},
-            {date: "19000103", country: "Spain",    amount: 18000,  price:  75},
-            {date: "19000103", country: "Malta",    amount: 19000,  price:  80},
-            {date: "19000103", country: "China",    amount: 12000,  price:  90},
-            {date: "19000103", country: "Mexico",   amount: 11000,  price:  150},
-            {date: "19000103", country: "Yemen",    amount: 500,    price:  5},
-            {date: "19000103", country: "Norway",   amount: 27500,  price:  150},
-            {date: "19000103", country: "Sweden",   amount: 3400,   price:  55},
-            {date: "19000103", country: "Denmark",  amount: 5600,   price:  65},
-            {date: "19000103", country: "Finland",  amount: 19700,  price:  90},
-            {date: "19000103", country: "Scotland", amount: 21000,  price:  45},
-            {date: "19000103", country: "England",  amount: 1300,   price:  35}
-        ];
+        var ndx = crossfilter(transactionsJson);
 
-    var ndx = crossfilter(data);
+        var parseDate = d3.time.format("%Y%m%d").parse;
 
-    var parseDate = d3.time.format("%Y%m%d").parse;
-
-    data.forEach(function(d){
-        d.date = parseDate(d.date);
-    });
-
-    var countryDim = ndx.dimension(function(d){
-        return d.country;
-    });
-
-    var statsByCountry = countryDim.group().reduce(
-        function (p, v) {
-            p.amount += +v["amount"];
-            p.price += +v["price"];
-            return p;
-        },
-        function (p, v) {
-            p.amount -= +v["amount"];
-            p.price -= +v["price"];
-            return p;
-        },
-        function () {
-            return {amount: 0, price: 0}
-        }
-    );
-
-
-    var amount_price_country_chart = dc.bubbleChart("#amount-price-country-chart");
-
-    amount_price_country_chart.width(990)
-        .height(400)
-        .margins({top: 10, right: 50, bottom: 30, left: 60})
-        .dimension(countryDim)
-        .group(statsByCountry)
-        .colors(d3.scale.category20())
-        .keyAccessor(function (p) {
-            return p.value.amount;
-        })
-        .valueAccessor(function (p) {
-            return p.value.price;
-        })
-        .radiusValueAccessor(function (p) {
-            return p.value.amount;
-        })
-        .x(d3.scale.linear().domain([0, 70000]))
-        .r(d3.scale.linear().domain([0, 70000]))
-        .minRadiusWithLabel(15)
-        .elasticY(true)
-        .yAxisPadding(100)
-        .elasticX(true)
-        .xAxisPadding(10000)
-        .maxBubbleRelativeSize(0.07)
-        .renderHorizontalGridLines(true)
-        .renderVerticalGridLines(true)
-        .renderLabel(true)
-        .renderTitle(true)
-        .title(function (p) {
-            return p.key
-                + "\n"
-                + "Amount : " + numberFormat(p.value.amount) + "\n"
-                + "Price: " + numberFormat(p.value.price);
+        transactionsJson.forEach(function(d){
+            d.date = parseDate(d.date);
         });
-    amount_price_country_chart.yAxis().tickFormat(function (s) {
-        return s;
-    });
-    amount_price_country_chart.xAxis().tickFormat(function (s) {
-        return s;
-    });
+
+        var countryDim = ndx.dimension(function(d){
+            return d.country;
+        });
+
+        var statsByCountry = countryDim.group().reduce(
+            function (p, v) {
+                p.amount += +v["amount"];
+                p.price += +v["price"];
+                return p;
+            },
+            function (p, v) {
+                p.amount -= +v["amount"];
+                p.price -= +v["price"];
+                return p;
+            },
+            function () {
+                return {amount: 0, price: 0}
+            }
+        );
 
 
-    dc.renderAll();
+        var amount_price_country_chart = dc.bubbleChart("#amount-price-country-chart");
 
+        amount_price_country_chart.width(990)
+            .height(400)
+            .margins({top: 10, right: 50, bottom: 30, left: 60})
+            .dimension(countryDim)
+            .group(statsByCountry)
+            .colors(d3.scale.category20())
+            .keyAccessor(function (p) {
+                return p.value.amount;
+            })
+            .valueAccessor(function (p) {
+                return p.value.price;
+            })
+            .radiusValueAccessor(function (p) {
+                return p.value.amount;
+            })
+            .x(d3.scale.linear().domain([0, 70000]))
+            .r(d3.scale.linear().domain([0, 70000]))
+            .minRadiusWithLabel(15)
+            .elasticY(true)
+            .yAxisPadding(100)
+            .elasticX(true)
+            .xAxisPadding(10000)
+            .maxBubbleRelativeSize(0.07)
+            .renderHorizontalGridLines(true)
+            .renderVerticalGridLines(true)
+            .renderLabel(true)
+            .renderTitle(true)
+            .title(function (p) {
+                return p.key
+                    + "\n"
+                    + "Amount : " + numberFormat(p.value.amount) + "\n"
+                    + "Price: " + numberFormat(p.value.price);
+            });
+        amount_price_country_chart.yAxis().tickFormat(function (s) {
+            return s;
+        });
+        amount_price_country_chart.xAxis().tickFormat(function (s) {
+            return s;
+        });
+
+
+        dc.renderAll();
+    };
 </script>
 
 </body>
