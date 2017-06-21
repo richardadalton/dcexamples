@@ -51,7 +51,16 @@
 
 <div class="container">
 
-<div id="chart-here"></div>
+<div class="col-md-12">
+<h4>Spending By Date</h3>
+<div id="date-spend-here"></div>
+</div>
+
+
+<div class="col-md-12">
+<h4>Transactions By Date</h3>
+<div id="date-count-here"></div>
+</div>
 
 <script>
     queue()
@@ -72,20 +81,17 @@
         });
 
         var minDate = dateDim.bottom(1)[0].date;
-        console.log(minDate);
         var maxDate = dateDim.top(1)[0].date;
-        console.log(maxDate);
 
-
-        var dim = ndx.dimension(function(d, i){
-            return [d.date, d.spend]
+        var spendDim = ndx.dimension(function(d){
+            return [d.date, d.spend];
         });
 
-        var group = dim.group().reduceSum(dc.pluck('spend'));
-        
-        var chart = dc.scatterPlot("#chart-here");
 
-        chart
+        var spendGroup = spendDim.group();
+        
+        var spend_chart = dc.scatterPlot("#date-spend-here");
+        spend_chart
             .width(768)
             .height(480)
             .x(d3.time.scale().domain([minDate, maxDate]))
@@ -93,8 +99,33 @@
             .symbolSize(8)
             .clipPadding(10)
             .yAxisLabel("This is the Y Axis!")
-            .dimension(dim)
-            .group(group);
+            .dimension(spendDim)
+            .group(spendGroup);
+
+        var dict = {};
+        var countDim = ndx.dimension(function(d, i){
+            if (!dict[d.date])
+                dict[d.date] = 0;
+
+            dict[d.date] = dict[d.date] + 1;
+            return [d.date, dict[d.date]];
+        });
+
+        var countGroup = countDim.group();
+
+
+        var count_chart = dc.scatterPlot("#date-count-here");
+        count_chart
+            .width(768)
+            .height(480)
+            .x(d3.time.scale().domain([minDate, maxDate]))
+            .y(d3.scale.linear().domain([0, 20]))
+            .brushOn(false)
+            .symbolSize(8)
+            .clipPadding(10)
+            .yAxisLabel("This is the Y Axis!")
+            .dimension(countDim)
+            .group(countGroup);
 
         dc.renderAll()    
     }
