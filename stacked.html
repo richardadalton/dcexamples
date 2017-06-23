@@ -49,22 +49,36 @@
     <h3>Stacked Chart</h3>
     <p>Stacked Charts show a breakdown of an overall measure.</p>
 
-    <div id="chart­monthly-spend"></div>
 
-    <div id="stacked"></div>
+    <div class="col-md-12">
+        <h4>Spending By Date</h4>
+        <div id="chart­-spending"></div>
+    </div>  
+    
+    <div class="col-md-12">
+        <h4>Store Spend By Name</h4>
+        <div id="stacked"></div>
+    </div>
+
+    <div class="col-md-12">
+        <h4>Percent Stacked</h4>
+        <div id="percent-stacked"></div>
+    </div>
 </div>
 
 <script type="text/javascript">
     queue()
         .defer(d3.json, "data/transactions.json")
+        .defer(d3.csv, "data/percent.csv")
         .await(makeGraphs);
 
-    function makeGraphs(error, transactionsJson) {
-        var ndx = crossfilter(transactionsJson);
+    function makeGraphs(error, transactions, percents) {
+        var ndx = crossfilter(transactions);
+        ndx.add(percents);
 
         var parseDate = d3.time.format("%m/%d/%Y").parse;
 
-        transactionsJson.forEach(function(d){
+        transactions.forEach(function(d){
             d.date = parseDate(d.date);
             d.month = d.date.getMonth();
         });
@@ -76,7 +90,7 @@
         var minMonth = dateDim.bottom(1)[0].date;
         var maxMonth = dateDim.top(1)[0].date;
 
-        var tomSpendByMonth = dateDim.group().reduceSum(function (d) {
+        var tomSpendByDate = dateDim.group().reduceSum(function (d) {
             if (d.name === 'Tom') {
                 return d.spend;
             } else {
@@ -84,7 +98,7 @@
             }
         });
 
-        var bobSpendByMonth = dateDim.group().reduceSum(function (d) {
+        var bobSpendByDate = dateDim.group().reduceSum(function (d) {
             if (d.name === 'Bob') {
                 return d.spend;
             } else {
@@ -92,7 +106,7 @@
             }
         });
 
-        var aliceSpendByMonth = dateDim.group().reduceSum(function (d) {
+        var aliceSpendByDate = dateDim.group().reduceSum(function (d) {
             if (d.name === 'Alice') {
                 return d.spend;
             } else {
@@ -100,16 +114,16 @@
             }
         });
 
-        var monthlySpendChart = dc.lineChart("#chart­monthly-spend");
+        var spendingChart = dc.lineChart("#chart­-spending");
 
-        monthlySpendChart
+        spendingChart
                 .width(990)
                 .height(400)
                 .renderArea(true)
                 .dimension(dateDim)
-                .group(tomSpendByMonth)
-                .stack(bobSpendByMonth)
-                .stack(aliceSpendByMonth)
+                .group(tomSpendByDate)
+                .stack(bobSpendByDate)
+                .stack(aliceSpendByDate)
                 .x(d3.time.scale().domain([minMonth,maxMonth]));
 
 
@@ -142,7 +156,30 @@
             .stack(bSpendByName)
             .x(d3.scale.ordinal())
             .xUnits(dc.units.ordinal);
+
         
+        personDim = ndx.dimension(dc.pluck('person'));
+
+        var percentByPerson = personDim.group().reduceSum(dc.pluck('percent'));
+
+        var remainderByPerson = personDim.group().reduceSum(
+            function(d) {
+                return 100 - d['percent'];
+            }
+            );
+        
+
+        var percentStackedChart = dc.barChart("#percent-stacked");
+
+        percentStackedChart
+            .width(300)
+            .height(300)
+            .dimension(personDim)
+            .group(percentByPerson)
+            .stack(remainderByPerson)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal);
+
         dc.renderAll();
     };
 </script>
