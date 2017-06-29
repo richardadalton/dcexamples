@@ -47,7 +47,15 @@
     <h3>Composite Chart</h3>
     <p>Composite Charts allow multiple charts to be plotted together.</p>
 
-<div id="composite-chart"></div>
+    <div class="col-md-12">
+        <h4>Date Composite Chart</h4>
+        <div id="composite-chart"></div>
+    </div>
+
+    <div class="col-md-12">
+        <h4>Ordinal Composite Chart</h4>
+        <div id="ordinal-composite-chart"></div>
+    </div>
 </div>
 
 <script>
@@ -70,9 +78,7 @@
         });
 
         var minDate = dateDim.bottom(1)[0].date;
-        console.log(minDate);
         var maxDate = dateDim.top(1)[0].date;
-        console.log(maxDate);
 
         var tomSpendByMonth = dateDim.group().reduceSum(function (d) {
             if (d.name === 'Tom') {
@@ -102,26 +108,59 @@
         compositeChart
             .width(990)
             .height(200)
+            .dimension(dateDim)
             .x(d3.time.scale().domain([minDate, maxDate]))
             .yAxisLabel("The Y Axis")
             .legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
             .renderHorizontalGridLines(true)
             .compose([
                 dc.lineChart(compositeChart)
-                    .dimension(dateDim)
                     .colors('green')
                     .group(tomSpendByMonth, 'Tom'),
                 dc.lineChart(compositeChart)
-                    .dimension(dateDim)
                     .colors('red')
                     .group(bobSpendByMonth, 'Bob'),
                 dc.lineChart(compositeChart)
-                    .dimension(dateDim)
                     .colors('blue')
                     .group(aliceSpendByMonth, 'Alice')
             ])
             .brushOn(false)
             .render();
+
+        
+        var nameDim = ndx.dimension(function(d){
+            return d.name;
+        });
+
+        var countByName = nameDim.group();
+
+        var spendByName = nameDim.group().reduceSum(function(d){
+            return d.spend;
+        });
+
+        var ordinalCompositeChart = dc.compositeChart('#ordinal-composite-chart');
+        ordinalCompositeChart
+            .width(990)
+            .height(200)
+            .dimension(nameDim)
+            .group(spendByName, 'Spend')
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .yAxisLabel("The Y Axis")
+            .legend(dc.legend().x(80).y(20).itemHeight(13).gap(5))
+            .renderHorizontalGridLines(true)
+            ._rangeBandPadding(1)
+            .compose([
+                dc.lineChart(compositeChart)
+                    .colors('green')
+                    .group(countByName, 'Count'),
+                dc.lineChart(compositeChart)
+                    .colors('red')
+                    .group(spendByName, 'Spend')
+            ])
+            .brushOn(false)
+            .render();
+
     };
 </script>
 
