@@ -46,12 +46,23 @@
 
 <div class="container">
     <h3>Row Chart</h3>
-    <p>A row chart is essentially a horizontal column chart. It can be particularly useful where the goal is to rank data items.</p>
+
+    <div class="col-md-12">
+        <h4>Row Chart </h4>
+        <p>A row chart is essentially a horizontal column chart. It can be particularly useful where the goal is to rank data items.</p>
+        <div id="chart-here"></div>
+    </div>  
+    
+    <div class="col-md-12">
+        <h4>Limit Rows</h4>
+        <p>Add a .cap(n) property to the rowchart to limit the number of bars show. Remaining bars are grouped into "Others"</p>
+        <p>To stop the "Others" bar being shown, add an .othersGrouper(false) property to the rowchart.</p>
+        <div id="limit-rows-chart-here"></div>
+    </div>
 </div>
 
-<div class="container">
 
-<div id="chart-here"></div>
+
 
 <script>
     queue()
@@ -73,14 +84,27 @@
 
         var chart = dc.rowChart("#chart-here");
 
-    chart
-        .width(600)
-        .height(330)
-        .dimension(dim)
-        .group(group)
-        .xAxis().ticks(4);
+        chart
+            .width(600)
+            .height(330)
+            .dimension(dim)
+            .group(group)
+            .xAxis().ticks(4);
+
+
+        var chart = dc.rowChart("#limit-rows-chart-here");
+
+        chart
+            .width(600)
+            .height(330)
+            .dimension(dim)
+            .group(group)
+            .cap(3)
+            .othersGrouper(false)
+            .xAxis().ticks(4);
 
         dc.renderAll()    
+
     }
 </script>
 </body>
