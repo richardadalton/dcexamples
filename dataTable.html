@@ -39,6 +39,7 @@
                     <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
                     <a href="compositeChart.html" class="btn btn-default" role="button">Composite</a>
                     <a href="stacked.html" class="btn btn-default" role="button">Stacked</a>
+                    <a href="boxPlot.html" class="btn btn-default" role="button">Box Plot</a>
                     <a href="rowChart.html" class="btn btn-default" role="button">Row</a>
                     <a href="scatterPlot.html" class="btn btn-default" role="button">Scatter</a>
                     <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
@@ -64,6 +65,24 @@
     <div id="table-here"></div>
 
     <script>
+
+
+        var max_speeds = {};
+
+        max_speeds["A"] = 123;
+        max_speeds["B"] = 126;
+        max_speeds["C"] = 57;
+        max_speeds["D"] = 92;
+
+        console.log(Object.keys(max_speeds).length);
+
+        for (var key in max_speeds) {
+            console.log(key + " : " + max_speeds[key]);
+        }
+
+
+
+
         queue()
             .defer(d3.json, "data/transactions.json")
             .await(makeGraphs);

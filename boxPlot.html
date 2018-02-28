@@ -47,90 +47,51 @@
 </header>
 
 <div class="container">
-    <h3>Scatter Plot</h3>
-    <p>A scatter plot graphs the values of two variables along two axes, the pattern of the resulting points reveals whether there is any correlation.</p>
+    <h3>Box Plot</h3>
+    <p>The box plot shows how clustered a set of data values are. Closely clustered data fits within a small box, broadly spread data requires a larger box.</p>
 </div>
 
 <div class="container">
 
-<div class="col-md-12">
-<h4>Spending By Date</h3>
-<div id="date-spend-here"></div>
+    <div id="chart-here"></div>
+
+    <script>
+
+        queue()
+            .defer(d3.json, "data/transactions.json")
+            .await(makeGraphs);
+
+        function makeGraphs(error, transactionsJson) {
+            var ndx = crossfilter(transactionsJson);
+
+            var state_dim = ndx.dimension(dc.pluck('state'));
+            var state_group = state_dim.group().reduce(
+                function(p,v) {
+                    p.push(v.spend);
+                    return p;
+                },
+                function(p,v) {
+                    p.splice(p.indexOf(v.spend), 1);
+                    return p;
+                },
+                function() {
+                    return [];
+                }
+            );
+
+            dc.boxPlot("#chart-here")
+                .width(768)
+                .height(480)
+                .margins({top: 10, right: 50, bottom: 30, left: 50})
+                .dimension(state_dim)
+                .group(state_group)
+                .x(d3.scale.ordinal())
+                .xUnits(dc.units.ordinal);
+
+            dc.renderAll()
+        }
+    </script>
+
 </div>
-
-
-<div class="col-md-12">
-<h4>Transactions By Date</h3>
-<div id="date-count-here"></div>
-</div>
-
-<script>
-    queue()
-        .defer(d3.json, "data/transactions.json")
-        .await(makeGraphs);
-
-    function makeGraphs(error, transactionsJson) {
-        var ndx = crossfilter(transactionsJson);
-
-        var parseDate = d3.time.format("%m/%d/%Y").parse;
-
-        transactionsJson.forEach(function(d){
-            d.date = parseDate(d.date);
-        });
-
-        var dateDim = ndx.dimension(function(d){
-            return d.date;
-        });
-
-        var minDate = dateDim.bottom(1)[0].date;
-        var maxDate = dateDim.top(1)[0].date;
-
-        var spendDim = ndx.dimension(function(d){
-            return [d.date, d.spend];
-        });
-
-
-        var spendGroup = spendDim.group();
-        
-        var spend_chart = dc.scatterPlot("#date-spend-here");
-        spend_chart
-            .width(768)
-            .height(480)
-            .x(d3.time.scale().domain([minDate, maxDate]))
-            .brushOn(false)
-            .symbolSize(8)
-            .clipPadding(10)
-            .yAxisLabel("This is the Y Axis!")
-            .dimension(spendDim)
-            .group(spendGroup);
-
-        var dict = {};
-        var countDim = ndx.dimension(function(d, i){
-            if (!dict[d.date])
-                dict[d.date] = 0;
-
-            dict[d.date] = dict[d.date] + 1;
-            return [d.date, dict[d.date]];
-        });
-
-        var countGroup = countDim.group();
-
-
-        var count_chart = dc.scatterPlot("#date-count-here");
-        count_chart
-            .width(768)
-            .height(480)
-            .x(d3.time.scale().domain([minDate, maxDate]))
-            .y(d3.scale.linear().domain([0, 20]))
-            .brushOn(false)
-            .symbolSize(8)
-            .clipPadding(10)
-            .yAxisLabel("This is the Y Axis!")
-            .dimension(countDim)
-            .group(countGroup);
-
-        dc.renderAll()    
-    }
-</script>
 </body>
 </html>
