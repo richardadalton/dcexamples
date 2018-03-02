@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="content-type" content="text/html" charset="utf-8">
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
     <title>DC.js Examples</title>
@@ -13,8 +13,8 @@
     <script type="text/javascript" src="static/js/crossfilter.js"></script>
     <script type="text/javascript" src="static/js/dc.js"></script>
     <script type="text/javascript" src="static/js/queue.js"></script>
-</head>
 
+</head>
 <body>
     <a href="https://github.com/richardadalton/dcexamples"><img style="position: absolute; top: 100; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 
@@ -37,6 +37,7 @@
                     <a href="rowChart.html" class="btn btn-default" role="button">Row</a>
                     <a href="scatterPlot.html" class="btn btn-default" role="button">Scatter</a>
                     <a href="bubbleChart.html" class="btn btn-default" role="button">Bubble</a>
+                    <a href="dynamicdimension.html" class="btn btn-default" role="button">Dynamic Dimension</a>
                     <a href="map.html" class="btn btn-default" role="button">Map</a>
                     <a href="dataTable.html" class="btn btn-default" role="button">Data Table</a>
                     <a href="filter.html" class="btn btn-default" role="button">Filter</a>
@@ -48,90 +49,85 @@
 </header>
 
 <div class="container">
-    <h3>Filtered Charts</h3>
-    <p>These charts are filtered using code. You can filter further by selecting a major in the Select Menu below.</p>
+    <h3>Map</h3>
+    <p>Maps can be used to plot and filter data by geographical region.</p>
 </div>
 
 <div class="container">
 
-<div id="select-here"></div>
+<div id="world-map"></div>
 
-<div id="chart-here"></div>
+<div id="bar-chart"></div>
+
+</div>
 
 <script>
     queue()
-        .defer(d3.csv, "data/grandslams.csv")
+        .defer(d3.json, "data/countries.json")
+        .defer(d3.json, "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
         .await(makeGraphs);
 
-    function makeGraphs(error, data) {
-        var ndx = crossfilter(data);
+    function makeGraphs(error, countriesJson, worldJson) {
 
-        show_select_menu(ndx);
-        show_winner_chart(ndx);
+        var ndx = crossfilter(countriesJson);
 
-        dc.renderAll()    
-    }
+        show_map_of_world(ndx, worldJson);
+        show_bar_chart(ndx);
+
+        dc.renderAll()
+    };
 
 
-    function show_select_menu(ndx) {
-        var tournamentDim = ndx.dimension(dc.pluck('Tournament'));
-        var tournamentGroup = tournamentDim.group();
+    function show_map_of_world(ndx, worldJson) {
+        var countryDim = ndx.dimension(dc.pluck('country'));
+        var group = countryDim.group().reduceSum(dc.pluck('amount'));
 
-        var count_by_tournament = tournamentDim.group().reduceCount();
+        var projection = d3.geo.mercator()
+            .center([0,40])
+            .scale(100)
+            .rotate([-12,0]);
 
-        dc.selectMenu('#select-here')
-            .dimension(tournamentDim)
-            .group(tournamentGroup);
-
-    }
-
-    function show_winner_chart(ndx) {
-
-        var winnerDim = ndx.dimension(dc.pluck("Winner"));
-        var winnerGroup = winnerDim.group();
-
-        var roundDim = ndx.dimension(dc.pluck("Round"));
-        roundDim.filter('The Final');
-
-        function filter_by_predicate(source_group, f) {
-            return {
-                all:function () {
-                    return source_group.all().filter(function(d) {
-                        return f(d);
-                    });
-                }
-            };
-        }
-
-        function remove_empty_bins(source_group) {
-            return {
-                all:function () {
-                    return source_group.all().filter(function(d) {
-                        return d.value !== 0; // if integers only
-                    });
-                }
-            };
-        }
-
-        winnerGroup = filter_by_predicate(winnerGroup, function (d) { return d.value > 0; });
-        // winnerGroup = remove_empty_bins(winnerGroup);
-
-        console.log(winnerGroup.all());
-
-        dc.barChart("#chart-here")
+        dc.geoChoroplethChart("#world-map")
             .width(1000)
+            .height(500)
+            .dimension(countryDim)
+            .group(group)
+            .colors(["#E2F2FF", "#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#7C151D"])
+            .colorDomain([500, 50000])
+            .overlayGeoJson(worldJson["features"], "state", function (d) {
+                return d.id;
+            })
+            .projection(projection)
+            .title(function (p) {
+                console.log(p);
+                return "Country: " + p["key"]
+                    + "\n"
+                    + "Total Spend: " + Math.round(p.value) + " $";
+            });
+    }
+
+    function show_bar_chart(ndx) {
+        var countryDim = ndx.dimension(dc.pluck('country'));
+        var group = countryDim.group().reduceSum(dc.pluck('amount'));
+
+        dc.barChart("#bar-chart")
+            .width(500)
             .height(300)
             .margins({top: 10, right: 50, bottom: 30, left: 50})
-            .dimension(winnerDim)
-            .group(winnerGroup)
+            .dimension(countryDim)
+            .group(group)
             .transitionDuration(500)
             .x(d3.scale.ordinal())
             .xUnits(dc.units.ordinal)
             .elasticY(true)
-            .xAxisLabel("Person")
+            .xAxisLabel("Country")
             .yAxis().ticks(4);
+
+
+
+
     }
 </script>
-</div>
+
 </body>
 </html>

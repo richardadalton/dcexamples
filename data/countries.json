@@ -1,0 +1,22 @@
+[
+  {"date": "19000103", "country": "IRL",  "amount": 10000,  "price":  50},
+  {"date": "19000103", "country": "AUS", "amount": 20000, "price":  60},
+  {"date": "19000103", "country": "AUT",  "amount": 15000,  "price":  40},
+  {"date": "19000103", "country": "FRA",   "amount": 12500,  "price":  100},
+  {"date": "19000103", "country": "DEU",  "amount": 22000,  "price":  120},
+  {"date": "19000103", "country": "JPN",    "amount": 30000,  "price":  150},
+  {"date": "19000103", "country": "USA",      "amount": 50000,  "price":  200},
+  {"date": "19000103", "country": "BEL",  "amount": 1000,   "price":  50},
+  {"date": "19000103", "country": "ITA",    "amount": 32000,  "price":  60},
+  {"date": "19000103", "country": "ESP",    "amount": 18000,  "price":  75},
+  {"date": "19000103", "country": "MLT",    "amount": 19000,  "price":  80},
+  {"date": "19000103", "country": "CHN",    "amount": 12000,  "price":  90},
+  {"date": "19000103", "country": "MEX",   "amount": 11000,  "price":  150},
+  {"date": "19000103", "country": "YEM",    "amount": 500,    "price":  5},
+  {"date": "19000103", "country": "NOR",   "amount": 27500,  "price":  150},
+  {"date": "19000103", "country": "SWE",   "amount": 3400,   "price":  55},
+  {"date": "19000103", "country": "DNK",  "amount": 5600,   "price":  65},
+  {"date": "19000103", "country": "FIN",  "amount": 19700,  "price":  90},
+  {"date": "19000103", "country": "ZAF", "amount": 21000,  "price":  45},
+  {"date": "19000103", "country": "GBR",  "amount": 1300,   "price":  35}
+]

@@ -129,9 +129,12 @@
     namePieChart
         .height(330)
         .radius(90)
+        .externalLabels(50)
+        .drawPaths(true)
         .transitionDuration(1500)
         .dimension(nameDim)
-        .group(spendByName);
+        .group(spendByName)
+        .legend(dc.legend());
 
     var storePieChart = dc.pieChart('#store-pie-chart');
 
